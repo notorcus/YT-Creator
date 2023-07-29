@@ -1,11 +1,21 @@
-import csv
+import csv, os
 import numpy as np
 import pandas as pd
 import glob
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from moviepy.editor import VideoFileClip, concatenate_videoclips, CompositeVideoClip, ImageClip
 from moviepy.config import change_settings
+# from videoeditor.silencedetect import silence_detect
+from silencedetect import silence_detect
 change_settings({"IMAGEMAGICK_BINARY": r"c:\Program Files\ImageMagick-7.1.1-Q16-HDRI\magick.exe"})
+
+def delete_file(file_path):
+    try:
+        os.remove(file_path)
+        print(f"File {file_path} has been deleted.")
+    except OSError as e:
+        print(f"Error: {file_path} : {e.strerror}")
+
 
 def convert_to_seconds(timestamp, timebase):
     hh, mm, ss, ff = map(int, timestamp.split(':'))
@@ -25,28 +35,32 @@ def convert_srt_to_secs(timestamp):
 def parse_srt(srt_file):
     with open(srt_file, 'r') as file:
         lines = file.readlines()
-        
+
     captions = []
     i = 0
     while i < len(lines):
-        if lines[i].strip().isdigit():  # skip index line
+        line = lines[i].strip()  # strip the line
+        if line.isdigit():  # skip index line
+            i += 1
+            line = lines[i].strip()  # strip the next line
+
+        if line:  # if the line is not empty
+            # split timestamp line into start and end times
+            start_time, end_time = map(str.strip, line.split('-->'))
             i += 1
 
-        # split timestamp line into start and end times
-        start_time, end_time = map(str.strip, lines[i].split('-->'))
-        i += 1
+            # read all subsequent lines until an empty line (the text of the subtitle)
+            text_lines = []
+            while i < len(lines) and lines[i].strip():  # check if the stripped line is not empty
+                text_lines.append(lines[i].strip())
+                i += 1
+            text = ' '.join(text_lines)
 
-        # read all subsequent lines until an empty line (the text of the subtitle)
-        text_lines = []
-        while i < len(lines) and lines[i].strip() != '':
-            text_lines.append(lines[i].strip())
-            i += 1
-        text = ' '.join(text_lines)
-
-        captions.append((start_time, end_time, text))
-        i += 1  # skip empty line
+            captions.append((start_time, end_time, text))
+        i += 1  # skip empty line or move to the next line
 
     return pd.DataFrame(captions, columns=['start', 'end', 'caption'])
+
 
 def make_text_image(caption):
     font_path = r'c:\\Users\\Akshat Kumar\\Editing\\packs\\ORCUS pack\\Fonts\\Noir Pro\\NoirPro-SemiBold.otf'
@@ -141,9 +155,46 @@ def editvideo(video_path, cutstamp_path, srt_path, num_videos: int):
 
             clips.append(clip)
 
-
         # Concatenate all clips together
         final_clip = concatenate_videoclips(clips)
+
+        # Set the fps for the audio
+        final_clip.audio.fps = 44100
+
+        audiofile_path = fr"output\finalvideo\audio_{i}.wav"
+
+        final_clip.audio.write_audiofile(audiofile_path)
+
+        silence_detect(audiofile_path, f'silence_data_{i}.csv')
+
+        silence_cuts = f'output/finalvideo/silence/silence_data_{i}.csv'
+
+        if os.path.exists(silence_cuts):
+
+            clips = []
+
+            # Keep track of the end of the last silence period
+            last_end = 0
+
+            # Load the CSV file
+            silence_data = load_csv(silence_cuts)
+
+            # Loop over the silence periods
+            for silence in silence_data:
+                # Make a new clip that starts at the end of the last silence period and ends at the start of this one
+                new_clip = clip.subclip(last_end, float(silence['start_time']))
+                clips.append(new_clip)
+
+                # Update the end of the last silence period
+                last_end = float(silence['end_time'])
+
+            # Add the last part of the video, from the end of the last silence period to the end of the video
+            clips.append(clip.subclip(last_end))
+
+            # Combine all the new clips into the final video
+            final_clip = concatenate_videoclips(clips)
+
+        delete_file(audiofile_path)
 
         # Write the final clip to a file with an index
         final_clip.write_videofile(
@@ -157,3 +208,5 @@ def editvideo(video_path, cutstamp_path, srt_path, num_videos: int):
 
     # Close the video file
     source_video.close()
+
+# editvideo("input/RP insulin.mp4", cutstamp_path="output/cutstamp", srt_path="output/transcribe/RP insulin.srt", num_videos=4)

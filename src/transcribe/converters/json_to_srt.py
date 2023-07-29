@@ -108,22 +108,18 @@ def generate_subtitles(data, min_duration, max_char_length):
 def to_srt_time(seconds):
     return str(timedelta(seconds=seconds))
 
-def save_to_srt(subtitles, filename):
-    with open(filename, 'w', encoding='utf-8') as f:
+def convert_to_srt(json_input, srt_output):
+    with open(json_input, 'r') as f:
+        data = json.load(f)
+
+    # Fill missing 'start' and 'end' keys
+    fill_all_missing_times(data)
+
+    # Generate subtitles
+    subtitles = generate_subtitles(data, min_duration=1.5, max_char_length=25)
+
+    with open(srt_output, 'w', encoding='utf-8') as f:
         for i, subtitle in enumerate(subtitles, 1):
             f.write(str(i) + '\n')
             f.write(to_srt_time(subtitle['start']) + " --> " + to_srt_time(subtitle['end']) + '\n')
             f.write(subtitle['text'] + '\n\n')
-
-# Load your JSON file
-with open("output/transcribe/RP insulin.json", 'r') as f:
-    data = json.load(f)
-
-# Fill missing 'start' and 'end' keys
-fill_all_missing_times(data)
-
-# Generate subtitles
-subtitles = generate_subtitles(data, min_duration=1.5, max_char_length=25)
-
-# Save to SRT file
-save_to_srt(subtitles, "output/transcribe/RP insulin(new).srt")

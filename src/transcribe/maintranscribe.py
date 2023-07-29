@@ -1,7 +1,7 @@
 import os
 import whisperx
 from moviepy.editor import VideoFileClip
-from transcribe.converters.json_to_srt_v1 import convert_to_srt
+from transcribe.converters.json_to_srt import convert_to_srt
 from transcribe.converters.json_to_transcript import convert_to_transcript
 
 output_path = ""

@@ -1,6 +1,6 @@
 from transcribe import maintranscribe
 from shortgen import gpt
-from videoeditor import maineditor_v2 as editor
+from videoeditor import maineditor as editor
 
 file = r"input/RP insulin.mp4"
 cutstamp_path = r"output/cutstamp"

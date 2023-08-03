@@ -1,4 +1,4 @@
-import pandas as pd
+import config
 from langchain.chat_models import ChatOpenAI
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains.summarize import load_summarize_chain
@@ -17,7 +17,6 @@ from langchain.prompts.chat import (
 
 import os
 from dotenv import load_dotenv
-from transcribe.maintranscribe import transcript_output_path as transcript_path
 
 load_dotenv()
 
@@ -35,7 +34,7 @@ llm4 = ChatOpenAI(temperature=0,
 
 
 
-def gen_cutstamps(transcript_path=transcript_path, num_videos: int = 3):
+def gen_cutstamps(transcript_path, num_videos: int = 3):
 
     with open(transcript_path) as file:
         transcript = file.read()
@@ -213,7 +212,9 @@ def gen_cutstamps(transcript_path=transcript_path, num_videos: int = 3):
         print(expanded_topic)
         print ("\n\n")
 
-        with open(fr"C:\Users\Akshat Kumar\AI\YT Creator\output\cutstamp\short_{counter}.csv", "w") as f:
+        abs_cutstamp = os.path.abspath(config.cutstamp_folder)
+
+        with open(os.path.join(abs_cutstamp, f"short_{counter}.csv"), "w") as f:
             f.write(expanded_topic)
             f.flush()
             os.fsync(f.fileno())

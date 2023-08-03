@@ -13,7 +13,7 @@ class Video:
         self.caption_df = parse_srt(srt_path)
         self.offset = 0
 
-    def edit_video(self, cutstamp_path, num_videos):
+    def edit(self, cutstamp_path, num_videos):
         caption_starts = [convert_srt_to_secs(t) - self.offset for t in self.caption_df['start']] 
         caption_ends = [convert_srt_to_secs(t) - self.offset for t in self.caption_df['end']] 
         captions = self.caption_df['caption'].tolist()

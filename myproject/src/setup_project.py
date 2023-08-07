@@ -1,4 +1,5 @@
-import os, config
+import os
+from . import config
 
 def setup_project(project_name):
     base_dir = "projects" 

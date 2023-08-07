@@ -1,6 +1,8 @@
-import os, config, whisperx
-from transcribe.converters.json_to_srt import convert_to_srt
-from transcribe.converters.json_to_transcript import convert_to_transcript
+import os
+from .. import config
+import whisperx
+from .converters.json_to_srt import convert_to_srt
+from .converters.json_to_transcript import convert_to_transcript
 
 
 

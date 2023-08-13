@@ -33,10 +33,10 @@ def transcribe(audio_file, speakers: int, language="en", device="cuda", model_na
     config.srt_path = os.path.join(abs_transcript_folder, f"{get_filename(audio_file)}.srt")
     config.trs_path = os.path.join(abs_transcript_folder, f"{get_filename(audio_file)}_transcript.txt")
 
-    print("folder path: ", abs_transcript_folder)
+    """ print("folder path: ", abs_transcript_folder)
     print("json path: ", config.srt_path)
     print("srt path: ", config.srt_path)
-    print("trs path: ", config.trs_path)
+    print("trs path: ", config.trs_path) """
 
     import json
 

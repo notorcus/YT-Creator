@@ -7,6 +7,12 @@ from src import config
 import os, json
 
 def process_video_core(url, mode="production"):
+    if mode == "frontend_dev":
+        # Read the testResponse.json file
+        with open("testResponse.json", 'r') as file:
+            response_data = json.load(file)
+        return response_data
+
     # Set up the project
     config.project_name = "project_1"
     setup_project(config.project_name)
@@ -46,21 +52,21 @@ def process_video_core(url, mode="production"):
         }
     }      
 
-    if mode == "cli":
-        print(response_data)
-        return
-    else:
-        return response_data
+    return response_data
 
 @csrf_exempt
 def process_video(request):
-    if request.method == 'POST':
-        url = request.POST['video_url']
-        response_data = process_video_core(url)
-        return JsonResponse(response_data)
-    else:
+    if request.method != 'POST':
         return HttpResponseBadRequest("Invalid method. Use POST instead.")
 
-if __name__ == '__main__':
-    url = input("Enter the video URL: ")
-    process_video_core(url, mode="cli")
+    data = json.loads(request.body.decode('utf-8'))
+
+    mode = data.get('mode', 'production')  # Default mode is "production"
+    url = data.get('video_url', '')  # Get the video URL
+
+    # Check if the video URL is provided for production mode
+    if mode == "production" and not url:
+        return HttpResponseBadRequest("Video URL is missing")
+
+    response_data = process_video_core(url, mode=mode)
+    return JsonResponse(response_data)

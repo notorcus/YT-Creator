@@ -3,13 +3,14 @@ from django.views.decorators.csrf import csrf_exempt
 from src.youtube.videodownloader import download
 from src.setup_project import setup_project
 from src.transcribe import maintranscribe as whisperx
+from src.responsegenerator import generate_response
 from src import config
 import os, json
 
 def process_video_core(url, mode="production"):
     if mode == "frontend_dev":
         # Read the testResponse.json file
-        with open("testResponse.json", 'r') as file:
+        with open("testResponse(new).json", 'r') as file:
             response_data = json.load(file)
         return response_data
 
@@ -23,34 +24,7 @@ def process_video_core(url, mode="production"):
     # Transcribe the audio file
     whisperx.transcribe(audio_file, speakers=1)
 
-    # Use the json_path from config
-    transcript_path = config.json_path
-    
-    # Read and parse the transcript
-    with open(transcript_path, 'r') as file:
-        transcript_data = json.load(file)
-
-    response_data = {
-        "status": "success",
-        "message": "Videos processed successfully.",
-        "data": {
-            "videos": [
-                {
-                    "start_time": "00:00:05", 
-                    "end_time": "00:00:30",
-                },
-                {
-                    "start_time": "00:01:21", 
-                    "end_time": "00:02:07",
-                },
-                {
-                    "start_time": "00:03:02", 
-                    "end_time": "00:04:19",
-                },
-            ],
-            "transcript": transcript_data
-        }
-    }      
+    response_data = generate_response(config.cutstamp_folder, config.words_path)
 
     return response_data
 

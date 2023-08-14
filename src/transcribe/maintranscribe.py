@@ -3,8 +3,7 @@ from .. import config
 import whisperx
 from .converters.json_to_srt import convert_to_srt
 from .converters.json_to_transcript import convert_to_transcript
-
-
+from .converters.json_to_words import filter_words
 
 def get_filename(filepath):
     filename = os.path.basename(filepath)
@@ -32,6 +31,7 @@ def transcribe(audio_file, speakers: int, language="en", device="cuda", model_na
     config.json_path = os.path.join(abs_transcript_folder, f"{get_filename(audio_file)}.json")
     config.srt_path = os.path.join(abs_transcript_folder, f"{get_filename(audio_file)}.srt")
     config.trs_path = os.path.join(abs_transcript_folder, f"{get_filename(audio_file)}_transcript.txt")
+    config.words_path = os.path.join(abs_transcript_folder, f"{get_filename(audio_file)}_words.json")
 
     """ print("folder path: ", abs_transcript_folder)
     print("json path: ", config.srt_path)
@@ -45,5 +45,6 @@ def transcribe(audio_file, speakers: int, language="en", device="cuda", model_na
 
     convert_to_srt(config.json_path, config.srt_path)
     convert_to_transcript(config.json_path, config.trs_path, speaker=speakers)
+    filter_words(config.json_path, config.words_path)
 
     print("Files Created")

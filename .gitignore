@@ -3,5 +3,6 @@
 input/
 output/
 projects/
+output_tests/
 **/__pycache__/
 **/.env

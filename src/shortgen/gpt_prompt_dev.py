@@ -109,14 +109,13 @@ def gen_cutstamps(transcript_path, num_videos: int = 3):
 def extract_topics_to_json(input_topics):
 
     # Splitting the data into lines and initializing an empty list
-    print(input_topics)
     lines = input_topics.strip().split("\n")
     structured_data = []
 
     # Regex pattern to extract time and topic details
     pattern = r"(\d{2}:\d{2}:\d{2}) - (\d{2}:\d{2}:\d{2}): (.+)$"
 
-    for line in lines:
+    for index, line in enumerate(lines, start=1):
         match = re.match(pattern, line)
         if match:
             start_time, end_time, topic_name = match.groups()
@@ -125,13 +124,15 @@ def extract_topics_to_json(input_topics):
                 "start_time": start_time,
                 "end_time": end_time
             })
+        else:
+            print(f"Warning: Line {index} does not match the expected structure. Content: '{line}'")
 
     with open("structured_topics.json", 'w') as outfile:
         json.dump(structured_data, outfile, indent=4)
 
 if __name__ == '__main__':
     # gen_cutstamps(r"projects\Goggins\intermediate\transcripts\MW_Goggins_transcript.txt")
-    topics = r"topics.txt"
+    topics = r"output_tests\topics.txt"
     
     with open(topics, 'r') as file:
         data = file.read()

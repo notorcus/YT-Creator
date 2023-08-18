@@ -1,6 +1,26 @@
 import json
 from datetime import timedelta
 
+def fill_missing_times(word, previous_word, next_word, last_word_end, next_word_start):
+    if 'start' not in word and last_word_end is not None:
+        word['start'] = last_word_end + 0.005
+    if 'end' not in word and next_word_start is not None:
+        word['end'] = next_word_start - 0.005
+    if previous_word and 'end' in previous_word:
+        word['start'] = previous_word['end'] + 0.005
+    if next_word and 'start' in next_word:
+        word['end'] = next_word['start'] - 0.005
+    return word
+
+def fill_all_missing_times(data):
+    for entry_index, entry in enumerate(data):
+        for word_index, word in enumerate(entry.get('words', [])):
+            previous_word = entry['words'][word_index - 1] if word_index > 0 else None
+            next_word = entry['words'][word_index + 1] if word_index < len(entry['words']) - 1 else None
+            last_word_end = data[entry_index - 1]['words'][-1]['end'] if entry_index > 0 else None
+            next_word_start = data[entry_index + 1]['words'][0]['start'] if entry_index < len(data) - 1 else None
+            word = fill_missing_times(word, previous_word, next_word, last_word_end, next_word_start)
+
 def generate_subtitles_for_text(words, min_duration, max_char_length):
     groups = []
     current_group = []
@@ -91,6 +111,9 @@ def to_srt_time(seconds):
 def convert_to_srt(json_input, srt_output):
     with open(json_input, 'r') as f:
         data = json.load(f)
+
+    # Fill missing 'start' and 'end' keys
+    fill_all_missing_times(data)
 
     # Generate subtitles
     subtitles = generate_subtitles(data, min_duration=1.5, max_char_length=25)

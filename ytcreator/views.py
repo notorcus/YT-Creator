@@ -22,7 +22,7 @@ def process_video_core(url, mode="production"):
     audio_file = download(url, output=os.path.join(config.project_dir, "input/"), file_name=config.project_name)
 
     # Transcribe the audio file
-    whisperx.transcribe(audio_file, speakers=1)
+    whisperx.transcribe(audio_file, config.transcript_folder, speakers=1)
 
     response_data = generate_response(config.cutstamp_folder, config.words_path)
 

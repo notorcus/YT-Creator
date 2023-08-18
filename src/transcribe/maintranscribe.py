@@ -10,7 +10,7 @@ def get_filename(filepath):
     filename_without_extension = os.path.splitext(filename)[0]
     return filename_without_extension
 
-def transcribe(audio_file, speakers: int, language="en", device="cuda", model_name="large-v2", batch_size=16, compute_type="float16"):
+def transcribe(audio_file, transcript_folder, speakers: int, language="en", device="cuda", model_name="large-v2", batch_size=16, compute_type="float16"):
 
     model = whisperx.load_model(model_name, device, compute_type=compute_type, language=language)
     audio = whisperx.load_audio(audio_file)
@@ -29,7 +29,6 @@ def transcribe(audio_file, speakers: int, language="en", device="cuda", model_na
 
     filtered_words = utils.fill_all_missing_times(result["word_segments"])
 
-    transcript_folder = os.path.abspath(config.transcript_folder)
     config.json_path = os.path.join(transcript_folder, f"{get_filename(audio_file)}.json")
     config.srt_path = os.path.join(transcript_folder, f"{get_filename(audio_file)}.srt")
     config.trs_path = os.path.join(transcript_folder, f"{get_filename(audio_file)}_transcript.txt")

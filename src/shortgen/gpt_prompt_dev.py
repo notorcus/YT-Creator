@@ -8,7 +8,6 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.chains import RetrievalQA
 from langchain.vectorstores import Pinecone
 import pinecone
-import json
 
 from langchain.prompts.chat import (
     ChatPromptTemplate,
@@ -16,7 +15,7 @@ from langchain.prompts.chat import (
     HumanMessagePromptTemplate
 )
 
-import os
+import json, os, re
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -64,7 +63,7 @@ def gen_cutstamps(transcript_path, num_videos: int = 3):
     Provide the timestamps followed by the name of the chapter, such as:
      00:00:00 - 00:02:30 Introduction and Context of Life's Struggles
      00:02:30 - 00:06:04 In-depth Exploration of Success, Hard Work, and Practical Advice
-     00:06:04 Emotional Support, Encouragement, and Conclusion
+     00:06:04 - 00:09:51 Emotional Support, Encouragement, and Conclusion
 
     The chapters should be fewer in number, each covering a significant and comprehensive part of the episode, and reflecting the overarching progression and thematic richness.
     """
@@ -106,40 +105,35 @@ def gen_cutstamps(transcript_path, num_videos: int = 3):
 
     topics_found = chain.run({"input_documents": docs})
 
-    schema = {
-        "type": "object",
-        "properties": {
-            "topic_name": {
-                "type": "string",
-                "description": "The name of the topic"
-            },
-            "timestamps": {
-                "type": "object",
-                "properties": {
-                    "start_time": {
-                        "type": "string",
-                        "pattern": "^(?:[01]\\d|2[0-3]):(?:[0-5]\\d):(?:[0-5]\\d)$",
-                        "description": "The start time of the topic in HH:MM:SS format"
-                    },
-                    "end_time": {
-                        "type": "string",
-                        "pattern": "^(?:[01]\\d|2[0-3]):(?:[0-5]\\d):(?:[0-5]\\d)$",
-                        "description": "The end time of the topic in HH:MM:SS format"
-                    }
-                },
-                "required": ["start_time", "end_time"]
-            }
-        },
-        "required": ["topic_name", "timestamps"]
-    }
 
-    chain = create_extraction_chain(schema, llm3)
-    topics_structured = chain.run(topics_found)
+def extract_topics_to_json(input_topics):
 
-    print(topics_structured)
+    # Splitting the data into lines and initializing an empty list
+    print(input_topics)
+    lines = input_topics.strip().split("\n")
+    structured_data = []
+
+    # Regex pattern to extract time and topic details
+    pattern = r"(\d{2}:\d{2}:\d{2}) - (\d{2}:\d{2}:\d{2}): (.+)$"
+
+    for line in lines:
+        match = re.match(pattern, line)
+        if match:
+            start_time, end_time, topic_name = match.groups()
+            structured_data.append({
+                "topic_name": topic_name,
+                "start_time": start_time,
+                "end_time": end_time
+            })
 
     with open("structured_topics.json", 'w') as outfile:
-        json.dump(topics_structured, outfile)
+        json.dump(structured_data, outfile, indent=4)
 
 if __name__ == '__main__':
-    gen_cutstamps(r"projects\Hormozi\intermediate\transcripts\Hormozi_audio_transcript.txt")
+    # gen_cutstamps(r"projects\Goggins\intermediate\transcripts\MW_Goggins_transcript.txt")
+    topics = r"topics.txt"
+    
+    with open(topics, 'r') as file:
+        data = file.read()
+    
+    extract_topics_to_json(data)

@@ -1,6 +1,6 @@
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
-from src.youtube.videodownloader import download
+from src.youtube.videodownloader import download, download_video_and_audio
 from src.setup_project import setup_project
 from src.transcribe import maintranscribe as whisperx
 from src.responsegenerator import generate_response
@@ -43,4 +43,31 @@ def process_video(request):
         return HttpResponseBadRequest("Video URL is missing")
 
     response_data = process_video_core(url, mode=mode)
+    return JsonResponse(response_data)
+    
+@csrf_exempt
+def download_video(request):
+    if request.method != 'POST':
+        return HttpResponseBadRequest("Invalid method. Use POST instead.")
+
+    data = json.loads(request.body.decode('utf-8'))
+    url = data.get('video_url', '')
+    
+
+    if not url:
+        return HttpResponseBadRequest("Video URL is missing")
+
+    output_path = "C:\\Users\\Akshat Kumar\\Editing\\Media\\"
+
+    # Download the video
+    local_file_path = download_video_and_audio(url, output=output_path)
+
+    response_data = {
+        "status": "success",
+        "message": "Video downloaded successfully.",
+        "file_path": local_file_path
+    }
+
+    print(response_data)
+
     return JsonResponse(response_data)

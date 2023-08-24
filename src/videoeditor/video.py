@@ -1,6 +1,6 @@
 from moviepy.editor import VideoFileClip, concatenate_videoclips, CompositeVideoClip, ImageClip
 from moviepy.config import change_settings
-from videoeditor.silencedetect import silence_detect
+from src.videoeditor.silencedetect import silence_detect
 import glob
 from videoeditor.utils import *
 

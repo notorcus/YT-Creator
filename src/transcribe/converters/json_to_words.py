@@ -10,3 +10,6 @@ def filter_words(json_path, output_path):
     
     with open(output_path, 'w') as outfile:
         json.dump(all_words, outfile)
+
+if __name__ == "__main__":
+    filter_words(r"projects\Goggins\intermediate\transcripts\MW Goggins.json", r"projects\Goggins\intermediate\transcripts\MW Goggins_words.json")

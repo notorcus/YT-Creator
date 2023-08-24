@@ -29,7 +29,7 @@ def fill_all_missing_times(data):
     return data
 
 if __name__ == "__main__":
-    input_path = r"projects\test new json\intermediate\transcripts\test new json_audio.json"
+    input_path = r"projects\Goggins\intermediate\transcripts\MW Goggins.json"
     
     with open(input_path, 'r') as infile:
         data = json.load(infile)

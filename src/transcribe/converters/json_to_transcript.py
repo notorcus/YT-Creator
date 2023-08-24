@@ -2,7 +2,8 @@ import json
 
 # create a dictionary mapping from speaker labels to speaker names
 speaker_mapping = {
-    "SPEAKER_00": "Mike",
+    "SPEAKER_00": "Speaker 1",
+    "SPEAKER_01": "Speaker 2"
     # add more speakers if needed
 }
 
@@ -50,4 +51,4 @@ def convert_to_transcript(json_filepath, txt_filepath, speaker: int):
         file.write(transcript)
 
 if __name__ == '__main__':
-    convert_to_transcript(r"projects\Hormozi\intermediate\transcripts\Hormozi_audio.json", r"projects\Hormozi\intermediate\transcripts\Hormozi_audio_transcript(HMS).txt", speaker=1)
+    convert_to_transcript(r"projects\Goggins\intermediate\transcripts\MW Goggins.json", r"projects\Goggins\intermediate\transcripts\MW_Goggins_transcript.txt", speaker=2)

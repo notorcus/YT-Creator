@@ -33,8 +33,8 @@ def generate_response(csv_folder, transcript_words):
     return response_data
 
 
-def find_closest_indices(transcript, start_time, end_time):
-    words = transcript
+def find_closest_indices(transcript_words, start_time, end_time):
+    words = transcript_words
     
     start_idx = min(range(len(words)), key=lambda i: abs(words[i]['start'] - start_time))
     end_idx = min(range(len(words)), key=lambda i: abs(words[i]['end'] - end_time))

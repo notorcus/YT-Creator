@@ -39,7 +39,11 @@ def save_to_csv(data, filename):
     else:
         print('No silence detected in the audio file.')
 
-def silence_detect(input_filename, output_filename):
-    stderr_output = detect(input_filename)
+def silence_detect(audio_path, output_filename):
+    stderr_output = detect(audio_path)
     silence_data = parse_output(stderr_output)
     save_to_csv(silence_data, fr"output\finalvideo\silence\{output_filename}")
+
+if __name__ == '__main__':
+    silence_detect()
+    pass

@@ -27,7 +27,7 @@ def transcribe(audio_file, transcript_folder, speakers: int, language="en", devi
         result = whisperx.assign_word_speakers(diarize_segments, result)
         print("Diarized")
 
-    filtered_words = utils.fill_all_missing_times(result["word_segments"])
+    utils.fill_all_missing_times(result["segments"])
 
     config.json_path = os.path.join(transcript_folder, f"{get_filename(audio_file)}.json")
     config.srt_path = os.path.join(transcript_folder, f"{get_filename(audio_file)}.srt")
@@ -40,7 +40,7 @@ def transcribe(audio_file, transcript_folder, speakers: int, language="en", devi
     print("trs path: ", config.trs_path) """
 
     with open(config.words_path, "w") as outfile:
-        json.dump(filtered_words, outfile, indent=4)
+        json.dump(result["word_segments"], outfile, indent=4)
 
     with open(config.json_path, "w") as outfile:
         json.dump(result["segments"], outfile, indent=4)

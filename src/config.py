@@ -6,6 +6,7 @@ json_path = None
 srt_path = None
 trs_path = None
 words_path = None
+react_public_folder_path = r"C:\Users\Akshat Kumar\AI\Shortcut-react\my-app\public"
 
 xml_folder = None
 silence_folder = None

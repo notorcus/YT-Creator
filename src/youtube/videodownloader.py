@@ -40,8 +40,9 @@ def download_video_and_audio(url, output, file_name=None):
     # Replace characters that might be invalid in a file name
     file_name = file_name.replace('|', '-').replace('/', '-').replace(':', '-').replace('?', '-')
 
+    file_path = os.path.join(output, file_name)
     # Name video file
-    video_filename = f"{output}{file_name}.mp4"
+    video_filename = f"{file_path}.mp4"
 
     # Check if the file exists and delete it
     if os.path.exists(video_filename):

@@ -1,6 +1,6 @@
 import json, os, csv
 
-def generate_response(csv_folder, transcript_words):
+def generate_response(csv_folder, transcript_words, video_path):
     with open(transcript_words, 'r') as file:
         transcript_data = json.load(file)
 
@@ -24,6 +24,7 @@ def generate_response(csv_folder, transcript_words):
     response_data = {
         "status": "success",
         "message": "Videos processed successfully.",
+        "video_path": video_path,
         "data": {
             "videos": videos_data,
             "transcript": transcript_data

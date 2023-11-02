@@ -5,6 +5,9 @@ def generate_response(csv_folder, transcript_words, video_path):
         transcript_data = json.load(file)
 
     video_times = get_video_times_from_csv(csv_folder)
+    
+    if not video_times:  # If there are no videos from CSV, create default videos
+        video_times = create_default_videos()
 
     videos_data = []
     for video in video_times:
@@ -63,6 +66,14 @@ def get_video_times_from_csv(csv_folder):
 
     return video_times
 
+def create_default_videos():
+    # Here you can define your default videos with their start and end times
+    default_videos = [
+        {"start_time": 10, "end_time": 30}, 
+        {"start_time": 20, "end_time": 60},
+        {"start_time": 60, "end_time": 100}
+    ]
+    return default_videos
 
 if __name__ == "__main__":
     response = generate_response(csv_folder=r"projects\project_1\intermediate\cutstamps", transcript_words=r"projects\project_1\intermediate\transcripts\transcript_words.json")

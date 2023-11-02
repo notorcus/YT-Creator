@@ -15,16 +15,17 @@ def process_video_core(url, mode="production"):
         return response_data
 
     # Set up the project
-    config.project_name = "project_1"
+    config.project_name = "Production project test"
     setup_project(config.project_name)
 
     # Specify your output directory and file name
     audio_file = download(url, output=os.path.join(config.project_dir, "input/"), file_name=config.project_name)
+    video_file = download_video_and_audio(url, config.react_public_folder_path, config.project_name)
 
     # Transcribe the audio file
     whisperx.transcribe(audio_file, config.transcript_folder, speakers=1)
 
-    response_data = generate_response(config.cutstamp_folder, config.words_path)
+    response_data = generate_response(config.cutstamp_folder, config.words_path, video_file)
 
     return response_data
 

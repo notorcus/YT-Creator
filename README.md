@@ -8,7 +8,7 @@ YT Creator is a generative AI tool designed to transform long-form content, such
 ![Alt text](image-1.png)
 
 
-1. Receives Video Link from Frontend - [views.py]([ytcreator/views.py))
+1. Receives Video Link from Frontend - [views.py](ytcreator/views.py)
 
 2. Video and Audio is downloaded and paths are saved - [videodownloader.py](src/youtube/videodownloader.py)
 

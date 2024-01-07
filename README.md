@@ -12,7 +12,7 @@ YT Creator is a generative AI tool designed to transform long-form content, such
 
 2. Video and Audio is downloaded and paths are saved - [videodownloader.py](src/youtube/videodownloader.py)
 
-3. Audio is transcribed with word level timestamps - [maintranscribe.py](src\transcribe/maintranscribe.py)
+3. Audio is transcribed with word level timestamps - [maintranscribe.py](src/transcribe/maintranscribe.py)
 
 4. Chapters are generated using OpenAI's GPT-3.5 LLM - [gpt.py](src/shortgen/gpt.py)
 

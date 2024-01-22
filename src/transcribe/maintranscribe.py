@@ -1,15 +1,16 @@
-import os, config, whisperx
-from transcribe.converters.json_to_srt import convert_to_srt
-from transcribe.converters.json_to_transcript import convert_to_transcript
-
-
+import json, os
+from .. import config
+import whisperx
+from .converters.json_to_srt import convert_to_srt
+from .converters.json_to_transcript import convert_to_transcript
+from .converters import utils
 
 def get_filename(filepath):
     filename = os.path.basename(filepath)
     filename_without_extension = os.path.splitext(filename)[0]
     return filename_without_extension
 
-def transcribe(audio_file, speakers: int, language="en", device="cuda", model_name="large-v2", batch_size=16, compute_type="float16"):
+def transcribe(audio_file, transcript_folder, speakers: int, language="en", device="cuda", model_name="large-v2", batch_size=16, compute_type="float16"):
 
     model = whisperx.load_model(model_name, device, compute_type=compute_type, language=language)
     audio = whisperx.load_audio(audio_file)
@@ -26,22 +27,25 @@ def transcribe(audio_file, speakers: int, language="en", device="cuda", model_na
         result = whisperx.assign_word_speakers(diarize_segments, result)
         print("Diarized")
 
-    abs_transcript_folder = os.path.abspath(config.transcript_folder)
-    config.json_path = os.path.join(abs_transcript_folder, f"{get_filename(audio_file)}.json")
-    config.srt_path = os.path.join(abs_transcript_folder, f"{get_filename(audio_file)}.srt")
-    config.trs_path = os.path.join(abs_transcript_folder, f"{get_filename(audio_file)}_transcript.txt")
+    utils.fill_all_missing_times(result["segments"])
 
-    print("folder path: ", abs_transcript_folder)
+    config.json_path = os.path.join(transcript_folder, f"{get_filename(audio_file)}.json")
+    config.srt_path = os.path.join(transcript_folder, f"{get_filename(audio_file)}.srt")
+    config.trs_path = os.path.join(transcript_folder, f"{get_filename(audio_file)}_transcript.txt")
+    config.words_path = os.path.join(transcript_folder, f"{get_filename(audio_file)}_words.json")
+
+    """ print("folder path: ", transcript_folder)
     print("json path: ", config.srt_path)
     print("srt path: ", config.srt_path)
-    print("trs path: ", config.trs_path)
+    print("trs path: ", config.trs_path) """
 
-    import json
+    with open(config.words_path, "w") as outfile:
+        json.dump(result["word_segments"], outfile, indent=4)
 
     with open(config.json_path, "w") as outfile:
-        json.dump(result["segments"], outfile)
+        json.dump(result["segments"], outfile, indent=4)
 
-    convert_to_srt(config.json_path, config.srt_path)
+    # convert_to_srt(config.json_path, config.srt_path)
     convert_to_transcript(config.json_path, config.trs_path, speaker=speakers)
 
     print("Files Created")

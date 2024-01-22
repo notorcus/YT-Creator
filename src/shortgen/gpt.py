@@ -1,4 +1,4 @@
-import pandas as pd
+from src import config
 from langchain.chat_models import ChatOpenAI
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains.summarize import load_summarize_chain
@@ -17,25 +17,24 @@ from langchain.prompts.chat import (
 
 import os
 from dotenv import load_dotenv
-from transcribe.maintranscribe import transcript_output_path as transcript_path
 
 load_dotenv()
 
 llm3 = ChatOpenAI(temperature=0,
                   openai_api_key=os.getenv("OPENAI_API_KEY"),
-                  model="gpt-3.5-turbo-0613",
+                  model="gpt-3.5-turbo",
                   request_timeout = 180
                 )
 
 llm4 = ChatOpenAI(temperature=0,
                   openai_api_key=os.getenv("OPENAI_API_KEY"),
-                  model="gpt-4-0613",
+                  model="gpt-4",
                   request_timeout = 180
                 )
 
 
 
-def gen_cutstamps(transcript_path=transcript_path, num_videos: int = 3):
+def gen_cutstamps(transcript_path, num_videos: int = 3):
 
     with open(transcript_path) as file:
         transcript = file.read()
@@ -150,31 +149,41 @@ def gen_cutstamps(transcript_path=transcript_path, num_videos: int = 3):
     # The 'question' in the human message below won't be a question per se, but rather a topic we want to get relevant information on
 
     system_template = """
-    You are a shortform content editor and will be given many topics from a podcast transcript.
-    Your job is to go through the transcript and filter out anything that is not related to the topic provided by the user. You will output the start
-    timecode and end timecode instead of writing all the words out. These timestamps will then be used to edit the video and it will be uploaded on
-    social media.
+    You are an AI tasked with extracting a single, meaningful shortform clip from a transcript. Your goal: craft a continuous, insightful, and entertaining clip that can span multiple segments but remains within a total duration of 30-90 seconds.
+    
+    Guidelines:
 
-    You may only output one pair of timecode. So make sure to go through the text thoroughly and choose the text that is most relevant to the chosen
-    topic. The timecode's duration should only be LESS THAN 2 minute. So choose wisely.
+    1. Strict Duration:
+     - Calculate the duration by converting timecodes to seconds. E.g., 00:01:25 is 85 seconds.
+     - Subtract the start time from the end time for each segment to find its duration. The combined time of all segments in the clip MUST be between 30 - 90 seconds.
+    2. Consolidate Text Segments:
+     - Extracted clips should contain no more than 3-5 separate timecodes.
+     - Merge consecutive text segments into longer content blocks. Do not list every individual text segment.
+     - Segments should be consecutive. If one segment's start time is the end time of the previous segment, combine them.
+    3. Context:
+     - Chosen segments should provide clear insight or narrative.
+     - They should be coherent when put together and not require extra context.
+    4. Content Selection: Focus on:
+     - Clear explanations or valuable insights.
+     - Entertaining or humorous moments, even if slightly off-topic.
+    5. Flow & Non-overlapping: The selected segments should flow seamlessly into each other, and there should be no overlaps.
+    
+    What to Avoid (with examples):
 
-    Your output might include these things related to the given topic:
-     - entertaining/funny momements
-     - answering a question
-     - facts, stories, analogies, cool/funny experiences
-     - Make sure to "end" timestamp once speaker is done talking about the topic or when it gets too irrelevant from the original topic.
-
-    Dont's:
-     - Never "end video" on a question
-     - Only make cuts when speaker is done talking about a certain thing.
-     - Never cutoff a speaker when they are not finished with their story or whatever.
-
-    The output should also be in a CSV format as described below.
-
-    Correct Example Output:
+     - Listing Every Minor Segment:
+         - Incorrect:
+           00:01:32,00:01:45
+           00:01:45,00:01:52
+         - Correct:
+           00:01:32,00:01:52
+     - Breaking the narrative.
+     - Exceeding or drastically falling short of the duration limit.
+    
+    Output Format: Provide the start and end timecodes for each segment in the clip in CSV format
 
     Start Time,End Time
-    00:01:30:20,00:02:45:10
+    00:01:30,00:01:45
+    00:02:05,00:02:45
 
     End of example.
 
@@ -194,14 +203,14 @@ def gen_cutstamps(transcript_path=transcript_path, num_videos: int = 3):
                                     chain_type="stuff",
                                     retriever=docsearch.as_retriever(k=5),
                                     chain_type_kwargs = {
-                                        #'verbose': True,
+                                        'verbose': True,
                                         'prompt': CHAT_PROMPT
                                     })
 
     # Initializing the counter
     counter = 1
 
-    for topic in topics_structured[:num_videos]:
+    for topic in topics_structured:
         query = f"""
             {topic['topic_name']}
         """
@@ -213,7 +222,9 @@ def gen_cutstamps(transcript_path=transcript_path, num_videos: int = 3):
         print(expanded_topic)
         print ("\n\n")
 
-        with open(fr"C:\Users\Akshat Kumar\AI\YT Creator\output\cutstamp\short_{counter}.csv", "w") as f:
+        abs_cutstamp = os.path.abspath(config.cutstamp_folder)
+
+        with open(os.path.join(abs_cutstamp, f"short_{counter}.csv"), "w") as f:
             f.write(expanded_topic)
             f.flush()
             os.fsync(f.fileno())

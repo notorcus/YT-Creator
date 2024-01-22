@@ -1,9 +1,11 @@
-import os, config
+import os
+from . import config
 
 def setup_project(project_name):
     base_dir = "projects" 
     config.project_dir = os.path.join(base_dir, project_name)
-    config.transcript_folder = os.path.join(config.project_dir, "intermediate", "transcripts")
+    config.transcript_folder = os.path.abspath(os.path.join(config.project_dir, "intermediate", "transcripts"))
+    config.cutstamp_folder = os.path.join(config.project_dir, "intermediate", "cutstamps")
     
     # Create input directory
     input_dir = os.path.join(config.project_dir, "input")

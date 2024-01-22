@@ -2,19 +2,18 @@ import json
 
 # create a dictionary mapping from speaker labels to speaker names
 speaker_mapping = {
-    "SPEAKER_00": "Mike",
+    "SPEAKER_00": "Speaker 1",
+    "SPEAKER_01": "Speaker 2"
     # add more speakers if needed
 }
 
 def seconds_to_time_format(seconds):
-    # Convert seconds into HH:MM:SS:FF format
+    # Convert seconds into HH:MM:SS format
     hours = int(seconds // 3600)
     seconds %= 3600
     minutes = int(seconds // 60)
-    seconds %= 60
-    frames = int((seconds % 1) * 24)  # assuming 24 frames per second
-    seconds = int(seconds)
-    return f"{hours:02d}:{minutes:02d}:{seconds:02d}:{frames:02d}"
+    seconds = int(seconds % 60)
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
 
 def convert_json_to_transcript(data, speaker: int):
     # Convert JSON data into the desired transcript format
@@ -51,4 +50,5 @@ def convert_to_transcript(json_filepath, txt_filepath, speaker: int):
     with open(txt_filepath, "w") as file:
         file.write(transcript)
 
-#convert_to_transcript("output/transcribe/RP insulin.json", "output/transcribe/RP insulin_transcript.txt", speaker=1)
+if __name__ == '__main__':
+    convert_to_transcript(r"projects\Goggins\intermediate\transcripts\MW Goggins.json", r"projects\Goggins\intermediate\transcripts\MW_Goggins_transcript.txt", speaker=2)

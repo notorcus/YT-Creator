@@ -3,5 +3,8 @@
 input/
 output/
 projects/
+output_tests/
+db.sqlite3
+temp.py
 **/__pycache__/
 **/.env
